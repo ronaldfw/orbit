@@ -58,8 +58,8 @@ class UprobesFunctionCallManager {
         tid_uprobe.registers.dx, tid_uprobe.registers.cx,
         tid_uprobe.registers.r8, tid_uprobe.registers.r9};
     auto function_call = std::make_optional<FunctionCall>(
-        tid, tid_uprobe.function_address,
-        tid_uprobe.begin_timestamp, end_timestamp,
+        tid, tid_uprobes_stack.top().function_address,
+        tid_uprobes_stack.top().begin_timestamp, end_timestamp,
         tid_uprobes_stack.size() - 1, return_value, regs);
     tid_uprobes_stack.pop();
     if (tid_uprobes_stack.empty()) {

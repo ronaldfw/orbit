@@ -114,6 +114,11 @@ static constexpr uint64_t SAMPLE_REGS_UPROBE =
   (1lu << PERF_REG_X86_XMM2) | (1lu << PERF_REG_X86_XMM3) |
   (1lu << PERF_REG_X86_XMM4) | (1lu << PERF_REG_X86_XMM5) |
   (1lu << PERF_REG_X86_XMM6) | (1lu << PERF_REG_X86_XMM7);*/
+// This must be in sync with struct perf_event_uret_probe in
+// PerfEventRecords.h.
+static constexpr uint64_t SAMPLE_REGS_URET_PROBE = (1lu << PERF_REG_X86_SP) |
+                                                   (1lu << PERF_REG_X86_IP) |
+                                                   (1lu << PERF_REG_X86_AX);
 
 // Max to pass to perf_event_open without getting an error is (1u << 16u) - 8,
 // because the kernel stores this in a short and because of alignment reasons.
