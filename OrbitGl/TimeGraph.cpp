@@ -35,6 +35,11 @@
 #include "absl/flags/flag.h"
 #include "absl/strings/str_format.h"
 
+<<<<<<< HEAD
+=======
+// TODO: Remove this flag once we have a way to toggle the display return values
+ABSL_FLAG(bool, show_return_values, true, "Show return values on time slices");
+>>>>>>> 4f19cc30... Pass integer argument to Timer objects.
 TimeGraph* GCurrentTimeGraph = nullptr;
 
 //-----------------------------------------------------------------------------
@@ -391,6 +396,7 @@ void TimeGraph::SelectLeft(const TextBox* a_TextBox) {
   double maxTimeUs = m_RefTimeUs + currentTimeWindowUs;
 
   SetMinMax(minTimeUs, maxTimeUs);
+  OnPickedTimer(timer);
 }
 
 //-----------------------------------------------------------------------------
@@ -411,10 +417,29 @@ void TimeGraph::SelectRight(const TextBox* a_TextBox) {
   double maxTimeUs = m_RefTimeUs + (1 - ratio) * currentTimeWindowUs;
 
   SetMinMax(minTimeUs, maxTimeUs);
+  OnPickedTimer(timer);
 }
 
 //-----------------------------------------------------------------------------
 void TimeGraph::NeedsUpdate() { m_NeedsUpdatePrimitives = true; }
+
+//-----------------------------------------------------------------------------
+std::string GetExtraInfo(const Timer& a_Timer) {
+  std::string info;
+  static bool show_return_value = absl::GetFlag(FLAGS_show_return_values);
+  if (!Capture::IsCapturing() && a_Timer.GetType() == Timer::UNREAL_OBJECT) {
+    info =
+        "[" + ws2s(GOrbitUnreal.GetObjectNames()[a_Timer.m_UserData[0]]) + "]";
+  }
+  else if (show_return_value && (a_Timer.GetType() == Timer::NONE)) {
+    info = absl::StrFormat(
+        "[ret:%lu rdi:%lu rsi:%lu rdx:%lu rcd:%lu r8:%lu r9:%lu]",
+        a_Timer.m_UserData[0], a_Timer.m_UserData[1], a_Timer.m_UserData[2],
+        a_Timer.m_UserData[3], a_Timer.m_UserData[4], a_Timer.m_UserData[5],
+        a_Timer.m_UserData[6]);
+  }
+  return info;
+}
 
 //-----------------------------------------------------------------------------
 void TimeGraph::UpdatePrimitives() {

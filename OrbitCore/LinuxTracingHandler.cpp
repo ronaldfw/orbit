@@ -129,7 +129,7 @@ void LinuxTracingHandler::OnFunctionCall(
   const std::vector<uint64_t> registers = function_call.GetRegisters();
   PRINT_VAR(registers.size());
   for(size_t i = 0; i < registers.size(); ++i) {
-    ERROR("reg[%lu] = %lu", i, registers[i]);
+    timer.m_UserData[1+i] = registers[i];
   }
 
   tracing_buffer_->RecordTimer(std::move(timer));
