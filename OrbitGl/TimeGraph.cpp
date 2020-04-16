@@ -35,6 +35,11 @@
 #include "absl/flags/flag.h"
 #include "absl/strings/str_format.h"
 
+<<<<<<< HEAD
+=======
+// TODO: Remove this flag once we have a way to toggle the display return values
+ABSL_FLAG(bool, show_return_values, true, "Show return values on time slices");
+>>>>>>> 4f19cc30... Pass integer argument to Timer objects.
 TimeGraph* GCurrentTimeGraph = nullptr;
 
 //-----------------------------------------------------------------------------

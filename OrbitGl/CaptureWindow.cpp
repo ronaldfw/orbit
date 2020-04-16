@@ -254,11 +254,7 @@ void CaptureWindow::SelectTextBox(class TextBox* a_TextBox) {
     time_graph_.Zoom(a_TextBox);
   }
 
-  time_graph_.OnPickedTimer(timer);
 }
-
-//-----------------------------------------------------------------------------
-void CaptureWindow::Hover(int a_X, int a_Y) {
   // 4 bytes per pixel (RGBA), 1x1 bitmap
   std::vector<uint8_t> pixels(1 * 1 * 4);
   glReadPixels(a_X, m_MainWindowHeight - a_Y, 1, 1, GL_RGBA, GL_UNSIGNED_BYTE,
