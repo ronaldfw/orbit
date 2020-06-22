@@ -615,17 +615,6 @@ void TracerThread::ProcessSampleEvent(const perf_event_header& header,
         1);
 
   int fd = ring_buffer->GetFileDescriptor();
-  // TODO?
-  constexpr size_t size_of_uretprobes = sizeof(perf_event_uretprobe);
-  bool is_uretprobe = !is_gpu_event && (header.size == size_of_uretprobes);
-
-  constexpr size_t size_of_sample = sizeof(perf_event_stack_sample);
-  bool is_sample = !is_gpu_event && (header.size == size_of_sample);
-
-  static_assert(size_of_uprobes != size_of_uretprobes &&
-                size_of_uprobes != size_of_sample &&
-                size_of_uretprobes != size_of_sample);
-  CHECK(is_gpu_event + is_uprobe + is_uretprobe + is_sample <= 1);
 
   if (is_uprobe) {
     auto event = make_unique_for_overwrite<UprobesPerfEvent>();

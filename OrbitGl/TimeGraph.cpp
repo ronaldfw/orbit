@@ -35,7 +35,6 @@
 #include "absl/flags/flag.h"
 #include "absl/strings/str_format.h"
 
-
 TimeGraph* GCurrentTimeGraph = nullptr;
 
 //-----------------------------------------------------------------------------
@@ -417,12 +416,17 @@ void TimeGraph::SelectRight(const TextBox* a_TextBox) {
 }
 
 //-----------------------------------------------------------------------------
+void TimeGraph::OnPickedTimer(const Timer& timer) {
+  UNUSED(timer);
+}
+
+//-----------------------------------------------------------------------------
 void TimeGraph::NeedsUpdate() { m_NeedsUpdatePrimitives = true; }
 
 //-----------------------------------------------------------------------------
 std::string GetExtraInfo(const Timer& a_Timer) {
   std::string info;
-  static bool show_return_value = absl::GetFlag(FLAGS_show_return_values);
+  static bool show_return_value = true;
   if (!Capture::IsCapturing() && a_Timer.GetType() == Timer::UNREAL_OBJECT) {
     info =
         "[" + ws2s(GOrbitUnreal.GetObjectNames()[a_Timer.m_UserData[0]]) + "]";
