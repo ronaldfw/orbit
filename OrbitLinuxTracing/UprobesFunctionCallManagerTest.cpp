@@ -93,6 +93,9 @@ TEST(UprobesFunctionCallManager, TwoUprobesDifferentThreads) {
   EXPECT_EQ(processed_function_call.value().GetDepth(), 0);
   EXPECT_EQ(processed_function_call.value().GetIntegerReturnValue(), 5);
 }
+
+TEST(UprobesFunctionCallManager, OnlyUretprobe) {
+  constexpr pid_t tid = 42;
   std::optional<FunctionCall> processed_function_call;
   UprobesFunctionCallManager function_call_manager;
 

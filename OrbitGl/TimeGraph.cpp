@@ -34,10 +34,8 @@
 #include "Utils.h"
 #include "absl/flags/flag.h"
 #include "absl/strings/str_format.h"
-#include "absl/flags/flag.h"
 
-// TODO: Remove this flag once we have a way to toggle the display return values
-ABSL_FLAG(bool, show_return_values, true, "Show return values on time slices");
+TimeGraph* GCurrentTimeGraph = nullptr;
 
 //-----------------------------------------------------------------------------
 TimeGraph::TimeGraph() {
@@ -94,6 +92,7 @@ void TimeGraph::Clear() {
   scheduler_track_ = nullptr;
   thread_tracks_.clear();
   gpu_tracks_.clear();
+  graph_tracks_.clear();
 
   cores_seen_.clear();
   scheduler_track_ = GetOrCreateSchedulerTrack();
@@ -266,9 +265,14 @@ void TimeGraph::ProcessTimer(const Timer& a_Timer) {
   if (a_Timer.m_FunctionAddress > 0) {
     Function* func = Capture::GTargetProcess->GetFunctionFromAddress(
         a_Timer.m_FunctionAddress);
+
     if (func != nullptr) {
       ++Capture::GFunctionCountMap[a_Timer.m_FunctionAddress];
       func->UpdateStats(a_Timer);
+      if (func->IsOrbitFunc()) {
+        ProcessOrbitFunctionTimer(func, a_Timer);
+        return;
+      }
     }
   }
 
@@ -293,6 +297,78 @@ void TimeGraph::ProcessTimer(const Timer& a_Timer) {
       scheduler_track_->OnTimer(a_Timer);
       cores_seen_.insert(a_Timer.m_Processor);
     }
+  }
+}
+
+//-----------------------------------------------------------------------------
+void TimeGraph::ProcessOrbitFunctionTimer(const Function* function,
+                                          const Timer& timer) {
+  Function::OrbitType type = function->GetOrbitType();
+
+  /*
+    ORBIT_TIMER_START,
+    ORBIT_TIMER_STOP,
+    ORBIT_LOG,
+    ORBIT_OUTPUT_DEBUG_STRING,
+    UNREAL_ACTOR,
+    ALLOC,
+    FREE,
+    REALLOC,
+    ORBIT_DATA,
+    ORBIT_TIMER_START_ASYNC,
+    ORBIT_TIMER_STOP_ASYNC,
+    ORBIT_TRACK_INT,
+    ORBIT_TRACK_INT_64,
+    ORBIT_TRACK_UINT,
+    ORBIT_TRACK_UINT_64,
+    ORBIT_TRACK_FLOAT,
+    ORBIT_TRACK_DOUBLE,
+    ORBIT_TRACK_FLOAT_AS_INT,
+    ORBIT_TRACK_DOUBLE_AS_INT_64,
+  */
+  switch (type) {
+    case Function::ORBIT_TRACK_INT: {
+      uint64_t graph_id = timer.m_UserData[1];
+      int32_t value = static_cast<int32_t>(timer.m_UserData[2]);
+      auto track = GetOrCreateGraphTrack(graph_id);
+      track->AddValue(value, timer);
+    } break;
+    case Function::ORBIT_TRACK_INT_64: {
+      uint64_t graph_id = timer.m_UserData[1];
+      int64_t value = static_cast<int64_t>(timer.m_UserData[2]);
+      auto track = GetOrCreateGraphTrack(graph_id);
+      track->AddValue(value, timer);
+    } break;
+    case Function::ORBIT_TRACK_UINT: {
+      uint64_t graph_id = timer.m_UserData[1];
+      uint32_t value = static_cast<int32_t>(timer.m_UserData[2]);
+      auto track = GetOrCreateGraphTrack(graph_id);
+      track->AddValue(value, timer);
+    } break;
+    case Function::ORBIT_TRACK_UINT_64: {
+      uint64_t graph_id = timer.m_UserData[1];
+      uint64_t value = static_cast<int64_t>(timer.m_UserData[2]);
+      auto track = GetOrCreateGraphTrack(graph_id);
+      track->AddValue(value, timer);
+    } break;
+    case Function::ORBIT_TRACK_FLOAT_AS_INT: {
+      uint64_t graph_id = timer.m_UserData[1];
+      int32_t int_value = static_cast<int32_t>(timer.m_UserData[2]);
+      float value = *(reinterpret_cast<float*>(&int_value));
+      auto track = GetOrCreateGraphTrack(graph_id);
+      track->AddValue(value, timer);
+      break;
+    }
+    case Function::ORBIT_TRACK_DOUBLE_AS_INT_64: {
+      uint64_t graph_id = timer.m_UserData[1];
+      int64_t int_value = static_cast<int64_t>(timer.m_UserData[2]);
+      double value = *(reinterpret_cast<double*>(&int_value));
+      auto track = GetOrCreateGraphTrack(graph_id);
+      track->AddValue(value, timer);
+      break;
+    }
+    default:
+      break;
   }
 }
 
@@ -418,30 +494,10 @@ void TimeGraph::SelectRight(const TextBox* a_TextBox) {
 }
 
 //-----------------------------------------------------------------------------
-void TimeGraph::OnPickedTimer(const Timer& timer) {
-  UNUSED(timer);
-}
+void TimeGraph::OnPickedTimer(const Timer& timer) { UNUSED(timer); }
 
 //-----------------------------------------------------------------------------
 void TimeGraph::NeedsUpdate() { m_NeedsUpdatePrimitives = true; }
-
-//-----------------------------------------------------------------------------
-std::string GetExtraInfo(const Timer& a_Timer) {
-  std::string info;
-  static bool show_return_value = absl::GetFlag(FLAGS_show_return_values);
-  if (!Capture::IsCapturing() && a_Timer.GetType() == Timer::UNREAL_OBJECT) {
-    info =
-        "[" + ws2s(GOrbitUnreal.GetObjectNames()[a_Timer.m_UserData[0]]) + "]";
-  }
-  else if (show_return_value && (a_Timer.GetType() == Timer::NONE)) {
-    info = absl::StrFormat(
-        "[ret:%lu rdi:%lu rsi:%lu rdx:%lu rcd:%lu r8:%lu r9:%lu]",
-        a_Timer.m_UserData[0], a_Timer.m_UserData[1], a_Timer.m_UserData[2],
-        a_Timer.m_UserData[3], a_Timer.m_UserData[4], a_Timer.m_UserData[5],
-        a_Timer.m_UserData[6]);
-  }
-  return info;
-}
 
 //-----------------------------------------------------------------------------
 void TimeGraph::UpdatePrimitives() {
@@ -570,6 +626,7 @@ std::shared_ptr<SchedulerTrack> TimeGraph::GetOrCreateSchedulerTrack() {
   return track;
 }
 
+//-----------------------------------------------------------------------------
 std::shared_ptr<ThreadTrack> TimeGraph::GetOrCreateThreadTrack(ThreadID a_TID) {
   ScopeLock lock(m_Mutex);
   std::shared_ptr<ThreadTrack> track = thread_tracks_[a_TID];
@@ -582,6 +639,7 @@ std::shared_ptr<ThreadTrack> TimeGraph::GetOrCreateThreadTrack(ThreadID a_TID) {
   return track;
 }
 
+//-----------------------------------------------------------------------------
 std::shared_ptr<GpuTrack> TimeGraph::GetOrCreateGpuTrack(
     uint64_t timeline_hash) {
   ScopeLock lock(m_Mutex);
@@ -590,6 +648,20 @@ std::shared_ptr<GpuTrack> TimeGraph::GetOrCreateGpuTrack(
     track = std::make_shared<GpuTrack>(this, string_manager_, timeline_hash);
     tracks_.emplace_back(track);
     gpu_tracks_[timeline_hash] = track;
+  }
+
+  return track;
+}
+
+//-----------------------------------------------------------------------------
+std::shared_ptr<GraphTrack> TimeGraph::GetOrCreateGraphTrack(
+    uint64_t graph_id) {
+  ScopeLock lock(m_Mutex);
+  std::shared_ptr<GraphTrack> track = graph_tracks_[graph_id];
+  if (track == nullptr) {
+    track = std::make_shared<GraphTrack>(this, graph_id);
+    tracks_.emplace_back(track);
+    graph_tracks_[graph_id] = track;
   }
 
   return track;
@@ -666,6 +738,11 @@ void TimeGraph::SortTracks() {
 
     // Gpu Tracks.
     for (const auto& timeline_and_track : gpu_tracks_) {
+      sorted_tracks_.emplace_back(timeline_and_track.second);
+    }
+
+    // Graph Tracks.
+    for (const auto& timeline_and_track : graph_tracks_) {
       sorted_tracks_.emplace_back(timeline_and_track.second);
     }
 
