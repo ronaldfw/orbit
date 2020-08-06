@@ -94,6 +94,8 @@ class GlCanvas : public GlPanel {
   float GetDeltaTimeSeconds() const { return m_DeltaTime; }
 
   virtual void Draw() {}
+  virtual void DrawOverlay() {}
+  virtual void DrawOverlay2() {}
   virtual void DrawScreenSpace() {}
   virtual void RenderUI() {}
   virtual void RenderText() {}
@@ -103,17 +105,27 @@ class GlCanvas : public GlPanel {
 
   PickingManager& GetPickingManager() { return m_PickingManager; }
 
+  static float Z_VALUE_TIME_BAR;
+  static float Z_VALUE_TIME_BAR_BG;
+
   static float Z_VALUE_UI;
-  static float Z_VALUE_TEXT;
-  static float Z_VALUE_TEXT_UI;
-  static float Z_VALUE_TEXT_UI_BG;
+  static float Z_VALUE_UI_TEXT;
+  static float Z_VALUE_UI_TEXT_BG;
+
+  static float Z_VALUE_OVERLAY2;
+  static float Z_VALUE_OVERLAY2_TEXT;
+
   static float Z_VALUE_OVERLAY;
+  static float Z_VALUE_OVERLAY_TEXT;
   static float Z_VALUE_OVERLAY_BG;
-  static float Z_VALUE_CONTEXT_SWITCH;
-  static float Z_VALUE_EVENT;
+
+  static float Z_VALUE_TIME_GRAPH_TEXT;
+  static float Z_VALUE_TIME_GRAPH_UI;
+  static float Z_VALUE_TIME_GRAPH_EVENT;
+  static float Z_VALUE_TIME_GRAPH_CONTEXT_SWITCH;
+  static float Z_VALUE_TIME_GRAPH_TRACKS;
   static float Z_VALUE_BOX_ACTIVE;
   static float Z_VALUE_BOX_INACTIVE;
-  static float Z_VALUE_TEXT_BG;
   static float Z_VALUE_EVENT_BAR;
   static float Z_VALUE_EVENT_BAR_PICKING;
 

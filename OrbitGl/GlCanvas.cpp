@@ -24,18 +24,27 @@
 
 RingBuffer<float, 512> GDeltaTimeBuffer;
 
-float GlCanvas::Z_VALUE_UI = 0.00f;
-float GlCanvas::Z_VALUE_TEXT_UI = 0.0f;
-float GlCanvas::Z_VALUE_TEXT_UI_BG = -0.005f;
-float GlCanvas::Z_VALUE_TEXT = -0.01f;
-float GlCanvas::Z_VALUE_OVERLAY = -0.012f;
-float GlCanvas::Z_VALUE_OVERLAY_BG = -0.013f;
-float GlCanvas::Z_VALUE_CONTEXT_SWITCH = -0.015f;
-float GlCanvas::Z_VALUE_EVENT = -0.015f;
+float GlCanvas::Z_VALUE_EVENT_BAR_PICKING = 0.1f;
+float GlCanvas::Z_VALUE_TIME_BAR = 0.08f;
+float GlCanvas::Z_VALUE_TIME_BAR_BG = 0.07f;
+float GlCanvas::Z_VALUE_UI = 0.05f;
+float GlCanvas::Z_VALUE_UI_TEXT = 0.f;
+float GlCanvas::Z_VALUE_UI_TEXT_BG = -0.003f;
+
+float GlCanvas::Z_VALUE_OVERLAY2_TEXT = -0.004f;
+float GlCanvas::Z_VALUE_OVERLAY2 = -0.005f;
+
+float GlCanvas::Z_VALUE_OVERLAY_TEXT = -0.007f;
+float GlCanvas::Z_VALUE_OVERLAY = -0.008f;
+float GlCanvas::Z_VALUE_OVERLAY_BG = -0.009f;
+float GlCanvas::Z_VALUE_TIME_GRAPH_TEXT = -0.01f;
+float GlCanvas::Z_VALUE_TIME_GRAPH_UI = -0.012f;
+float GlCanvas::Z_VALUE_TIME_GRAPH_EVENT = -0.015f;
+float GlCanvas::Z_VALUE_TIME_GRAPH_CONTEXT_SWITCH = -0.015f;
 float GlCanvas::Z_VALUE_BOX_ACTIVE = -0.02f;
 float GlCanvas::Z_VALUE_BOX_INACTIVE = -0.03f;
-float GlCanvas::Z_VALUE_EVENT_BAR = -0.1f;
-float GlCanvas::Z_VALUE_EVENT_BAR_PICKING = 0.1f;
+float GlCanvas::Z_VALUE_TIME_GRAPH_TRACKS = -1.0f;
+float GlCanvas::Z_VALUE_EVENT_BAR = -1.0f;
 
 //-----------------------------------------------------------------------------
 void ClearCaptureData() {
@@ -453,10 +462,29 @@ void GlCanvas::Render(int a_Width, int a_Height) {
 
   Draw();
 
-  // We have to draw everything collected in the batcher at this point,
-  // as prepareScreenSpaceViewport() changes the coordinate system.
   ui_batcher_.Draw();
+  m_TextRenderer.Display(&ui_batcher_);
+  RenderText();
   ui_batcher_.Reset();
+
+  m_TextRenderer.Clear();
+
+  DrawOverlay();
+
+  ui_batcher_.Draw();
+  m_TextRenderer.Display(&ui_batcher_);
+  RenderText();
+  ui_batcher_.Reset();
+
+  m_TextRenderer.Clear();
+
+  DrawOverlay2();
+  ui_batcher_.Draw();
+  m_TextRenderer.Display(&ui_batcher_);
+  RenderText();
+  ui_batcher_.Reset();
+
+  m_TextRenderer.Clear();
 
   prepareScreenSpaceViewport();
 

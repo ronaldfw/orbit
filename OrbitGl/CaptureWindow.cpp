@@ -559,8 +559,14 @@ void CaptureWindow::Draw() {
   m_PickingManager.Reset();
 
   time_graph_.Draw(this, GetPickingMode());
+}
 
-  if (!m_Picking && m_SelectStart[0] != m_SelectStop[0]) {
+void CaptureWindow::DrawOverlay() {
+  time_graph_.DrawOverlay(this, GetPickingMode());
+}
+
+void CaptureWindow::DrawOverlay2() {
+    if (!m_Picking && m_SelectStart[0] != m_SelectStop[0]) {
     TickType minTime = std::min(m_TimeStart, m_TimeStop);
     TickType maxTime = std::max(m_TimeStart, m_TimeStop);
 
@@ -571,10 +577,14 @@ void CaptureWindow::Draw() {
     Vec2 pos(from, m_WorldTopLeftY - m_WorldHeight);
     Vec2 size(sizex, m_WorldHeight);
 
+    Box box(pos, size, GlCanvas::Z_VALUE_OVERLAY2);
+    ui_batcher_.AddBox(box, Color(0, 128, 0, 200), PickingID::BOX);
+
     std::string time = GetPrettyTime(TicksToDuration(minTime, maxTime));
-    TextBox box(pos, size, time, Color(0, 128, 0, 128));
-    box.SetTextY(m_SelectStop[1]);
-    box.Draw(&ui_batcher_, m_TextRenderer, -FLT_MAX, true, true);
+
+    GetTextRenderer().AddText(
+          time.c_str(), pos[0] + sizex, m_SelectStop[1],
+          GlCanvas::Z_VALUE_OVERLAY2_TEXT, Color(255, 255, 255, 255), time.length(), true);
   }
 
   if (!m_Picking && !m_IsHovering) {
@@ -582,7 +592,7 @@ void CaptureWindow::Draw() {
     RenderTimeBar();
 
     Vec2 pos(m_MouseX, m_WorldTopLeftY);
-    ui_batcher_.AddVerticalLine(pos, -m_WorldHeight, Z_VALUE_TEXT,
+    ui_batcher_.AddVerticalLine(pos, -m_WorldHeight, Z_VALUE_OVERLAY2,
                                 Color(0, 255, 0, 127), PickingID::LINE);
   }
 }
@@ -594,7 +604,6 @@ void CaptureWindow::DrawScreenSpace() {
   Color col = slider_->GetBarColor();
   float height = slider_->GetPixelHeight();
   float canvasHeight = getHeight();
-  float z = GlCanvas::Z_VALUE_TEXT_UI_BG;
 
   const TimeGraphLayout& layout = time_graph_.GetLayout();
   float vertical_margin = layout.GetVerticalMargin();
@@ -630,14 +639,14 @@ void CaptureWindow::DrawScreenSpace() {
   float margin_x0 = margin_x1 - vertical_margin;
 
   Box box(Vec2(margin_x0, 0),
-          Vec2(margin_x1 - margin_x0, canvasHeight - height), z);
+          Vec2(margin_x1 - margin_x0, canvasHeight - height), GlCanvas::Z_VALUE_UI_TEXT_BG);
   ui_batcher_.AddBox(box, kBackgroundColor, PickingID::BOX);
 
   // Time bar background
   if (time_graph_.GetCaptureTimeSpanUs() > 0) {
     Box box(Vec2(0, time_graph_.GetLayout().GetSliderWidth()),
             Vec2(getWidth(), time_graph_.GetLayout().GetTimeBarHeight()),
-            GlCanvas::Z_VALUE_TEXT_UI_BG);
+            GlCanvas::Z_VALUE_TIME_BAR_BG);
     ui_batcher_.AddBox(box, Color(70, 70, 70, 200), PickingID::BOX);
   }
 }
@@ -717,7 +726,7 @@ void CaptureWindow::DrawStatus() {
     std::string injectStr =
         absl::StrFormat(" %s", Capture::GInjectedProcess.c_str());
     m_ProcessX = m_TextRenderer.AddText2D(injectStr.c_str(), PosX, PosY,
-                                          Z_VALUE_TEXT_UI, s_Color, -1, true);
+                                          Z_VALUE_UI_TEXT, s_Color, -1, true);
     PosY += s_IncY;
   }
 }
@@ -917,11 +926,11 @@ void CaptureWindow::RenderTimeBar() {
       std::string text = GetPrettyTime(absl::Microseconds(current_micros));
       float worldX = time_graph_.GetWorldFromUs(current_micros);
       m_TextRenderer.AddText(text.c_str(), worldX + xMargin, worldY,
-                             GlCanvas::Z_VALUE_TEXT_UI,
+                             GlCanvas::Z_VALUE_TIME_BAR,
                              Color(255, 255, 255, 255));
 
       Vec2 pos(worldX, worldY);
-      ui_batcher_.AddVerticalLine(pos, height, GlCanvas::Z_VALUE_UI,
+      ui_batcher_.AddVerticalLine(pos, height, GlCanvas::Z_VALUE_TIME_BAR,
                                   Color(255, 255, 255, 255), PickingID::LINE);
     }
   }

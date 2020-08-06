@@ -618,7 +618,6 @@ void TimeGraph::Draw(GlCanvas* canvas, PickingMode picking_mode) {
   }
 
   DrawTracks(canvas, picking_mode);
-  DrawOverlay(canvas, picking_mode);
   m_Batcher.Draw(picking);
 
   m_NeedsRedraw = false;
@@ -642,8 +641,8 @@ std::string GetTimeString(const TextBox* box_a, const TextBox* box_b) {
 
 [[nodiscard]] Color GetIteratorBoxColor(uint64_t index) {
   constexpr uint64_t kNumColors = 2;
-  const Color kLightBlueGray = Color(177, 203, 250, 60);
-  const Color kMidBlueGray = Color(81, 102, 157, 60);
+  const Color kLightBlueGray = Color(0, 0, 150, 180);
+  const Color kMidBlueGray = Color(0, 0, 100, 180);
   Color colors[kNumColors] = {kLightBlueGray, kMidBlueGray};
   return colors[index % kNumColors];
 }
@@ -662,7 +661,7 @@ void DrawIteratorBox(GlCanvas* canvas, Vec2 pos, Vec2 size, const Color& color,
   float max_size = size[0];
   canvas->GetTextRenderer().AddTextTrailingCharsPrioritized(
       text.c_str(), pos[0] + kLeftOffset, text_y + kAdditionalSpaceForLine,
-      GlCanvas::Z_VALUE_TEXT, Color(255, 255, 255, 255), time.length(),
+      GlCanvas::Z_VALUE_OVERLAY_TEXT, Color(255, 255, 255, 255), time.length(),
       max_size);
 
   constexpr const float kOffsetBelowText = kAdditionalSpaceForLine / 2.f;

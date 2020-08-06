@@ -100,7 +100,7 @@ void TextBox::Draw(Batcher* batcher, TextRenderer& a_TextRenderer, float a_MinX,
     col = selectionColor;
   }
 
-  float z = a_IsHighlighted ? GlCanvas::Z_VALUE_CONTEXT_SWITCH
+  float z = a_IsHighlighted ? GlCanvas::Z_VALUE_TIME_GRAPH_CONTEXT_SWITCH
                             : isInactive ? GlCanvas::Z_VALUE_BOX_INACTIVE
                                          : GlCanvas::Z_VALUE_BOX_ACTIVE;
 
@@ -132,7 +132,7 @@ void TextBox::Draw(Batcher* batcher, TextRenderer& a_TextRenderer, float a_MinX,
     if (!a_IsPicking && !isCoreActivity) {
       a_TextRenderer.AddText(
           text.c_str(), posX, m_TextY == FLT_MAX ? m_Pos[1] + 1.f : m_TextY,
-          GlCanvas::Z_VALUE_TEXT, s_Color, maxSize, a_RightJustify);
+          GlCanvas::Z_VALUE_UI_TEXT, s_Color, maxSize, a_RightJustify);
     }
   }
 

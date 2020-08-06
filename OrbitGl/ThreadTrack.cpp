@@ -167,7 +167,7 @@ void ThreadTrack::SetTimesliceText(const TimerInfo& timer_info,
   float max_size = box_pos[0] + box_size[0] - pos_x;
   text_renderer_->AddTextTrailingCharsPrioritized(
       text_box->GetText().c_str(), pos_x,
-      text_box->GetPosY() + layout.GetTextOffset(), GlCanvas::Z_VALUE_TEXT,
+      text_box->GetPosY() + layout.GetTextOffset(), GlCanvas::Z_VALUE_TIME_GRAPH_TEXT,
       kTextWhite, text_box->GetElapsedTimeTextLength(), max_size);
 }
 

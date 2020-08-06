@@ -82,7 +82,7 @@ void EventTrack::UpdatePrimitives(uint64_t min_tick, uint64_t max_tick,
                                   PickingMode picking_mode) {
   Batcher* batcher = &time_graph_->GetBatcher();
   const TimeGraphLayout& layout = time_graph_->GetLayout();
-  float z = GlCanvas::Z_VALUE_EVENT;
+  float z = GlCanvas::Z_VALUE_TIME_GRAPH_EVENT;
   float track_height = layout.GetEventTrackHeight();
   const bool picking = picking_mode != PickingMode::kNone;
 

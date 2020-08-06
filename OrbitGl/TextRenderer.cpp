@@ -176,6 +176,7 @@ void TextRenderer::AddTextInternal(texture_font_t* font, const char* text,
                                    float a_MaxSize, float a_Z, bool) {
   size_t i;
   float r = color.red, g = color.green, b = color.blue, a = color.alpha;
+  CHECK(a == 1.0f);
   float textZ = a_Z;
 
   float maxWidth = a_MaxSize == -1.f ? FLT_MAX : ToScreenSpace(a_MaxSize);

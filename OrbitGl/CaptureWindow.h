@@ -42,6 +42,8 @@ class CaptureWindow : public GlCanvas {
                   bool a_Alt) override;
   void OnTimer() override;
   void Draw() override;
+  void DrawOverlay() override;
+  void DrawOverlay2() override;
   void DrawScreenSpace() override;
   void DrawStatus();
   void RenderUI() override;

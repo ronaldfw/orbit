@@ -6,6 +6,7 @@
 
 #include "Capture.h"
 #include "ImGuiOrbit.h"
+#include "GlCanvas.h"
 
 //-----------------------------------------------------------------------------
 TimeGraphLayout::TimeGraphLayout() {
@@ -32,8 +33,8 @@ TimeGraphLayout::TimeGraphLayout() {
   m_TextOffset = 5.f;
   m_VerticalMargin = 10.f;
   m_SchedulerTrackOffset = 10.f;
-  m_TextZ = -0.02f;
-  m_TrackZ = -0.1f;
+  m_TextZ = GlCanvas::Z_VALUE_TIME_GRAPH_TEXT;
+  m_TrackZ = GlCanvas::Z_VALUE_TIME_GRAPH_TRACKS;
   m_ToolbarIconHeight = 24.f;
   scale_ = 1.f;
   time_bar_height_ = 15.f;

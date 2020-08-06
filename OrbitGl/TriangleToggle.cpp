@@ -34,7 +34,7 @@ void TriangleToggle::Draw(GlCanvas* canvas, PickingMode picking_mode) {
   float half_h = half_sqrt_three * half_w;
 
   if (!picking) {
-    Vec3 position(pos_[0], pos_[1], 0.0f);
+    Vec3 position(pos_[0], pos_[1], GlCanvas::Z_VALUE_TIME_GRAPH_UI);
 
     Triangle triangle;
     if (state_ == State::kCollapsed) {
@@ -52,7 +52,7 @@ void TriangleToggle::Draw(GlCanvas* canvas, PickingMode picking_mode) {
     float original_width = 2 * half_w;
     float large_width = 2 * original_width;
     Box box(Vec2(pos_[0] - original_width, pos_[1] - original_width),
-            Vec2(large_width, large_width), 0.f);
+            Vec2(large_width, large_width), GlCanvas::Z_VALUE_TIME_GRAPH_UI);
     batcher->AddBox(box, color, PickingID::PICKABLE);
   }
 }
