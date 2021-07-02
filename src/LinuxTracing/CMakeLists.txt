@@ -70,7 +70,7 @@ target_link_libraries(LinuxTracing PUBLIC
         ObjectUtils
         OrbitBase
         CONAN_PKG::abseil
-        CONAN_PKG::libunwindstack)
+        unwindstack)
 
 add_executable(LinuxTracingTests)
 
