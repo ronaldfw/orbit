@@ -449,6 +449,10 @@ bool DetectAndHandleEpilog(const csh& capstone_handle, const std::vector<uint8_t
     if (is_first_iteration && instruction->id == X86_INS_LEA) {
       ALOGI_IF(kVerboseLogging, "lea instruction op string: %s", instruction->op_str);
       // TODO: Set rsp accordingly.
+
+      // Note that this instruction is only legal as the first instruction if frame pointers
+      // are being used.
+
     } else if (is_first_iteration && instruction->id == X86_INS_ADD) {
       ALOGI("add instruction op string: %s", instruction->op_str);
       ALOGI("op count: %u", instruction->detail->x86.op_count);
